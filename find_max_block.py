@@ -3,35 +3,29 @@ import image
 import lcd
 import time
 
+# 参数设置,精确度设置
+percision=3
+# 目标宽度
+objectivewitdh=42
+# objectivewidth =
+
 # 位置控制
 # 距离
-def control_position(size,size_thresholds_min,size_thresholds_max)
-
-    if size > size_thresholds_min and size < size_thresholds_max:
-        print('ok',size)
-    # 比例大于阈值，远离目标
-    elif size > size_thresholds_max:
-        print('up close',size)
-    # 比例小于阈值，靠近目标
-    elif size < size_thresholds_min:
-        print('so far',size)
-# 方向
-def hori_control_orientation(current_x,target_x = 0,precision = 20)
-    target=[target_x+precision,target_x-precision]
-    if current_x < target[0] and current_x > target[1]:
-        pass
-    if current_x < target[1]:
-        pass
-    if current_x > target[0]:
-        pass
-
+def comparewidth(current_width,percision=10,objectivewitdh=10):
+    w_max = percision + objectivewitdh
+    w_min = objectivewitdh - percision
+    if current_width > w_max:
+        return 1
+    if current_width < w_min:
+        return -1
+    return 0
 
 lcd.init()
 sensor.reset(freq=24000000, set_regs=True, dual_buff=True)
 # 设置颜色格式
 sensor.set_pixformat(sensor.RGB565)
 # 设置捕捉格式
-sensor.set_framesize(sensor.QQVGA)
+sensor.set_framesize(sensor.QVGA)
 # 设置亮度增益 +-2
 # sensor.set_brightness(1)
 # 饱和度
@@ -49,10 +43,11 @@ purpose = [0,0]
 while True:
     # img=sensor.snapshot()
     # 镜头矫正
-    img = sensor.snapshot().lens_corr(1.9)
+    img = sensor.snapshot().lens_corr(1.2)
     #寻找色块对象
     blobs = img.find_blobs([rgb_thresholds[1]])
     a=[0,0,0,0,0,0,0,0]
+    # 找出最大色块
     if blobs:
         for b in blobs:
             a[7]=b.area()
@@ -66,7 +61,17 @@ while True:
         # print(a)
             # 通过面积判断矩形面积确定物理距离
             # width=a[2] high=a[3] area=a[7]
-        size = a[2]
-        control_position(size,size_thresholds)
+        current_width = a[2]
+        infer = comparewidth(current_width,percision,objectivewitdh)
+        if  infer == -1:
+            ## forward method
+            print("so far",current_width)
+        elif infer == 1:
+            ## backward method
+            print("too close",current_width)
+        elif infer == 0:
+            ## rotate method
+            print("ok",current_width)
+        # control_position(size,size_thresholds)
 #   lcd.rotation(2)
     lcd.display(img)
