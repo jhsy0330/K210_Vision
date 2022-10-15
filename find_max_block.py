@@ -6,7 +6,8 @@ import time
 # 参数设置,精确度设置
 percision=3
 # 目标宽度
-objectivewitdh=42
+objectivewitdh=20
+
 # objectivewidth =
 
 # 位置控制
