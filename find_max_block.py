@@ -3,6 +3,9 @@ import image
 import lcd
 import time
 
+# setting pi
+PI = 3.14159265
+
 # 参数设置,精确度设置
 percision=3
 # 目标宽度
@@ -27,6 +30,8 @@ sensor.reset(freq=24000000, set_regs=True, dual_buff=True)
 sensor.set_pixformat(sensor.RGB565)
 # 设置捕捉格式
 sensor.set_framesize(sensor.QVGA)
+# 设置增益
+sensor.set_gainceiling(8)
 # 设置亮度增益 +-2
 # sensor.set_brightness(1)
 # 饱和度
@@ -45,9 +50,11 @@ while True:
     # img=sensor.snapshot()
     # 镜头矫正
     img = sensor.snapshot().lens_corr(1.2)
+    # 拉普拉斯锐化
+    img.laplacian(1,sharpen=True)
     #寻找色块对象
     blobs = img.find_blobs([rgb_thresholds[1]])
-    a=[0,0,0,0,0,0,0,0]
+    a=[0,0,0,0,0,0,0,0,0]
     # 找出最大色块
     if blobs:
         for b in blobs:
@@ -57,6 +64,8 @@ while True:
                     a[0:4]=b.rect()
                     a[4]=b.cx()
                     a[5]=b.cy()
+                    a[8]=b.rotation()
+                    #获取方块对象的旋转角度，计算倾斜程度后矩形宽度
         img.draw_rectangle(a[0:4])
         img.draw_cross(a[4], a[5])
         # print(a)
@@ -67,12 +76,15 @@ while True:
         if  infer == -1:
             ## forward method
             print("so far",current_width)
+            print("rotation = ",a[8]*180/PI)
         elif infer == 1:
             ## backward method
             print("too close",current_width)
+            print("rotation = ",a[8]*180/PI)
         elif infer == 0:
             ## rotate method
             print("ok",current_width)
+            print("rotation = ",a[8]*180/PI)
         # control_position(size,size_thresholds)
 #   lcd.rotation(2)
     lcd.display(img)
