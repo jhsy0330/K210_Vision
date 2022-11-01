@@ -9,7 +9,7 @@ PI = 3.14159265
 # 参数设置,精确度设置
 percision=3
 # 目标宽度
-objectivewitdh=20
+objectivewitdh=30
 
 # objectivewidth =
 
@@ -33,27 +33,29 @@ sensor.set_framesize(sensor.QVGA)
 # 设置增益
 sensor.set_gainceiling(8)
 # 设置亮度增益 +-2
-# sensor.set_brightness(1)
+sensor.set_brightness(1)
 # 饱和度
-# sensor.set_saturation(1)
+sensor.set_saturation(1)
 sensor.run(1)
 # 图像大小阈值与误差范围
 size_thresholds = [30,40]
 
 #红色阈值[0],绿色阈值[1],蓝色阈值[2]
+#(30, 100, 15, 127, 15, 127)
+#(17, 32, -54, 22, -24, 14)
 rgb_thresholds =[
-                (30, 100, 15, 127, 15, 127),
+                (0, 38, 8, 18, -128, 127),
                 (0, 80, -70, -10, -0, 30),
                 (0, 30, 0, 64, -128, -20)]
 purpose = [0,0]
 while True:
     # img=sensor.snapshot()
     # 镜头矫正
-    img = sensor.snapshot().lens_corr(1.2)
+    img = sensor.snapshot().lens_corr(0.75)
     # 拉普拉斯锐化
-    img.laplacian(1,sharpen=True)
+    #img.laplacian(1,sharpen=True)
     #寻找色块对象
-    blobs = img.find_blobs([rgb_thresholds[1]])
+    blobs = img.find_blobs([rgb_thresholds[0]])
     a=[0,0,0,0,0,0,0,0,0]
     # 找出最大色块
     if blobs:
